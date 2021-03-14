@@ -140,8 +140,9 @@ dmypy.json
 cython_debug/
 
 test/
-test.py
+test/test.py
 
 .idea
 
+bak/
 config.json
