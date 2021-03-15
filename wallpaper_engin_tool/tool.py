@@ -1,37 +1,35 @@
-from wallpaper_engin_tool import *
+from .checker import *
+from .params import Params
 
 
 class Tool:
     def __init__(self):
-        self.__params = Params()
-        self.__acf_parser = AcfParser(self.__params.path_to_workshop + 'appworkshop_431960.acf')
-        self.__local_wallpaper_checker = LocalWallpaperChecker(self.__params)
-        self.__deleted_wallpaper_checker = DeletedWallpaperChecker(self.__params.proxies)
-        self.__network_wallpaper_checker = NetworkWallpaperChecker(self.__params.proxies, self.__params.cookies)
+        params = Params()
 
-    def parse_workshop_acf(self):
-        """
-        解析 wallpaper engine 用于创意工坊的配置文件
-        :return: None
-        """
-        print('正在解析 wallpaper engine 用于创意工坊的配置文件（注意其中仍包含已经从创意工坊消失的壁纸）')
-
-        print('\t已安装 {} 个壁纸'.format(len(self.__acf_parser.installed_items)))
-        print('\t已订阅 {} 个壁纸'.format(len(self.__acf_parser.subscribed_items)))
-
-        self.__acf_parser.check()
+        self.__local_wallpaper_checker = LocalWallpaperChecker(params)
+        self.__deleted_wallpaper_checker = DeletedWallpaperChecker(params.proxies)
+        self.__network_wallpaper_checker = NetworkWallpaperChecker(params.proxies, params.cookies)
 
     def check_local_items(self):
         """
-        检查储存在本地的壁纸文件
+        解析 wallpaper engine 用于创意工坊的配置文件, 检查储存在本地的壁纸文件
         :return: None
         """
 
-        print('正在扫描本地文件')
+        print('正在解析 wallpaper engine 用于创意工坊的配置文件（包含已从创意工坊消失的壁纸）')
+        print('\t已安装 {} 个壁纸'.format(len(self.__local_wallpaper_checker.installed_items)))
+        print('\t已订阅 {} 个壁纸'.format(len(self.__local_wallpaper_checker.subscribed_items)))
+        self.__local_wallpaper_checker.checked_uninstalled()
 
+        print('正在扫描本地文件')
         self.__local_wallpaper_checker.list_items()
-        self.__local_wallpaper_checker.check_rongyu(self.__acf_parser.subscribed_items)
-        self.__local_wallpaper_checker.check_backup(self.__acf_parser.subscribed_items)
+        self.__local_wallpaper_checker.check_undeleted()
+        self.__local_wallpaper_checker.check_backup()
+
+    def check_network_items(self):
+        print('正在查询账户订阅情况')
+        self.__network_wallpaper_checker.html_downloader()
+        print('\n\t你订阅了 {} 个壁纸'.format(len(self.__network_wallpaper_checker.subscription)))
 
     def find_deleted_items(self):
         """
@@ -40,18 +38,15 @@ class Tool:
         """
 
         print('正在检查本地订阅')
-        self.__deleted_wallpaper_checker.check(self.__local_wallpaper_checker.local_items)
-        local_deleted = self.__deleted_wallpaper_checker.deleted_items
-        if local_deleted:
+        self.__deleted_wallpaper_checker.check(self.__local_wallpaper_checker.local_items, 0)
+        if self.__deleted_wallpaper_checker.local_deleted_items:
             op = input('\t是否备份已经消失的订阅 (y/N)')
             if op == 'y':
-                self.__local_wallpaper_checker.backup(local_deleted)
+                self.__local_wallpaper_checker.backup(self.__deleted_wallpaper_checker.local_deleted_items)
 
         print('正在检查账户订阅')
-        self.__network_wallpaper_checker.html_downloader()
-        self.__deleted_wallpaper_checker.deleted_items = []
-        self.__deleted_wallpaper_checker.check(self.__network_wallpaper_checker.subscription)
-        network_deleted = self.__deleted_wallpaper_checker.deleted_items
-        op = input('\t是否下载已经消失的订阅的预览图 (y/N)')
-        if op == 'y':
-            self.__network_wallpaper_checker.backup(network_deleted)
+        self.__deleted_wallpaper_checker.check(self.__network_wallpaper_checker.subscription, 1)
+        if self.__deleted_wallpaper_checker.network_deleted_items:
+            op = input('\t是否下载已经消失的订阅的预览图 (y/N)')
+            if op == 'y':
+                self.__network_wallpaper_checker.backup(self.__deleted_wallpaper_checker.network_deleted_items)
