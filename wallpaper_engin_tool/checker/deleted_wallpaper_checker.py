@@ -1,26 +1,20 @@
 import threading
 
-import requests
-
 
 class DeletedWallpaperChecker:
-    def __init__(self, proxies):
+    def __init__(self, http_getter):
+        self.__http_getter = http_getter
+
         self.local_deleted_items = []
         self.network_deleted_items = []
         self.deleted_items = [self.local_deleted_items, self.network_deleted_items]
-        self.__proxies = proxies
 
     def look_up(self, item, where):
         url = "https://steamcommunity.com/sharedfiles/filedetails/"
         params = {"id": item}
-        try:
-            result = requests.get(url=url, params=params, proxies=self.__proxies)
-            if not result:
-                raise Exception
-            if result.text.find('Error') != -1 or result.text.find('错误') != -1:
-                self.deleted_items[where].append(item)
-        except:
-            self.look_up(item, where)
+        result = self.__http_getter.get(url=url, params=params)
+        if result.text.find('Error') != -1 or result.text.find('错误') != -1:
+            self.deleted_items[where].append(item)
 
     def check(self, items, where):
         threads = []

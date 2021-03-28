@@ -1,17 +1,18 @@
 from matplotlib import pyplot as plt
 from venn import venn
 
-from .checker import *
-from .params import Params
+from .checker import LocalWallpaperChecker, DeletedWallpaperChecker, NetworkWallpaperChecker
+from .utils import Params, HttpGetter
 
 
 class Tool:
     def __init__(self):
         params = Params()
+        http_getter = HttpGetter(params.proxies, params.cookies)
 
         self.__local_wallpaper_checker = LocalWallpaperChecker(params)
-        self.__deleted_wallpaper_checker = DeletedWallpaperChecker(params.proxies)
-        self.__network_wallpaper_checker = NetworkWallpaperChecker(params.proxies, params.cookies)
+        self.__deleted_wallpaper_checker = DeletedWallpaperChecker(http_getter)
+        self.__network_wallpaper_checker = NetworkWallpaperChecker(http_getter)
 
     def check_local_items(self):
         """
