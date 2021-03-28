@@ -1,4 +1,5 @@
 import os
+import re
 
 import requests
 import requests.utils
@@ -41,8 +42,9 @@ class NetworkWallpaperChecker:
         if not os.path.isdir('bak'):
             os.mkdir('bak')
         for item in deleted_items:
-            path = 'bak/[{}]{}.jpg'.format(item, self.titles[item]).replace('|', '-').replace(':', '-')
-            # print(path)
+            filename = '[{}]{}.jpg'.format(item, self.titles[item])
+            safe_filename = re.compile(r'[/:*?"<>|\\]').sub('-', filename)
+            path = 'bak/' + safe_filename
             if not os.path.isfile(path):
                 print('\t正在下载桌面 {} 的预览图'.format(item))
                 result = requests.get(self.images[item])

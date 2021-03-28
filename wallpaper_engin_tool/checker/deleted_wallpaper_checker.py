@@ -15,6 +15,8 @@ class DeletedWallpaperChecker:
         params = {"id": item}
         try:
             result = requests.get(url=url, params=params, proxies=self.__proxies)
+            if not result:
+                raise Exception
             if result.text.find('Error') != -1 or result.text.find('错误') != -1:
                 self.deleted_items[where].append(item)
         except:
