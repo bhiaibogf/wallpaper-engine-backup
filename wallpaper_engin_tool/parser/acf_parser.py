@@ -1,6 +1,3 @@
-import sys
-
-
 class AcfParser:
     """
     解析本地 acf 文件，获取已安装的/已订阅的项目
@@ -44,5 +41,3 @@ class AcfParser:
         # 找到已订阅壁纸的开始位置
         self.idx += 1
         return self.__parse()
-
-
