@@ -1,10 +1,13 @@
+import requests
+
+
 class _NetworkParams:
     def __init__(self):
         self.proxies = None
         self.cookies = ''
 
     @staticmethod
-    def _get_proxies():
+    def _input_proxies():
         proxy = input('请输入你使用的代理类型（socks5/http）（默认为 socks5）：')
         if not proxy:
             proxy = 'socks5'
@@ -20,8 +23,25 @@ class _NetworkParams:
         }
         return proxies
 
+    @property
+    def __check_proxies(self):
+        try:
+            requests.head('https://www.google.com', proxies=self.proxies)
+            return True
+        except Exception:
+            print('代理信息 {} 有误'.format(self.proxies))
+            return False
+
+    def set_proxies(self, proxies):
+        self.proxies = proxies
+        if self.__check_proxies:
+            return False
+        else:
+            self.set_proxies(self._input_proxies())
+            return True
+
     @staticmethod
-    def _get_cookies():
+    def _input_cookies():
         cookies_string = input('请输入你登录 steam 后的 cookies：\n')
         cookies = {}
         for line in cookies_string.split('; '):
@@ -29,10 +49,30 @@ class _NetworkParams:
             cookies[name] = value
         return cookies
 
-    def update_proxies(self):
-        self.proxies = self._get_proxies()
-        self.__save()
+    def __check_cookies(self):
+        try:
+            session = requests.Session()
+            requests.utils.add_dict_to_cookiejar(session.cookies, self.cookies)
+            result = session.head('https://steamcommunity.com/my', proxies=self.proxies)
+            session.close()
 
-    def update_cookies(self):
-        self.cookies = self._get_cookies()
-        self.__save()
+            location = result.headers['Location'].split('/')
+            state = location[3]
+            if state == 'id':
+                print('你好 {}'.format(location[4]))
+            elif state == 'login':
+                raise Exception
+            else:
+                raise Exception
+            return True
+        except Exception:
+            print('cookies 过期')
+            return False
+
+    def set_cookies(self, cookies):
+        self.cookies = cookies
+        if self.__check_cookies():
+            return False
+        else:
+            self.set_cookies(self._input_cookies())
+            return True
