@@ -6,4 +6,4 @@ if __name__ == '__main__':
     tool.check_network_items()
     tool.find_deleted_items()
     tool.diff()
-    # tool.draw_venn()
+    tool.draw_venn()

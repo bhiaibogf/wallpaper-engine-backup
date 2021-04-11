@@ -5,6 +5,7 @@ class _NetworkParams:
     def __init__(self):
         self.proxies = None
         self.cookies = ''
+        self.user_id = ''
 
     @staticmethod
     def _input_proxies():
@@ -59,7 +60,8 @@ class _NetworkParams:
             location = result.headers['Location'].split('/')
             state = location[3]
             if state == 'id':
-                print('你好 {}'.format(location[4]))
+                self.user_id = location[4]
+                print('你好 {}，欢迎使用 Wallpaper Engine Tool'.format(self.user_id))
             elif state == 'login':
                 raise Exception
             else:

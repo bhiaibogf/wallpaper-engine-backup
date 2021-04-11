@@ -5,7 +5,8 @@ from ..parser import HtmlParser
 
 
 class NetworkWallpaperChecker:
-    def __init__(self, http_getter):
+    def __init__(self, user_id, http_getter):
+        self.__user_id = user_id
         self.__http_getter = http_getter
 
         self.subscription = []
@@ -13,7 +14,7 @@ class NetworkWallpaperChecker:
         self.titles = {}
 
     def html_downloader(self):
-        url = 'https://steamcommunity.com/id/bhiaibogf/myworkshopfiles/'
+        url = 'https://steamcommunity.com/id/{}/myworkshopfiles/'.format(self.__user_id)
         params = {
             'appid': '431960',
             'browsefilter': 'mysubscriptions',

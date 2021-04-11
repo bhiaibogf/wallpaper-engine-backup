@@ -12,7 +12,7 @@ class Tool:
 
         self.__local_wallpaper_checker = LocalWallpaperChecker(params)
         self.__deleted_wallpaper_checker = DeletedWallpaperChecker(http_getter)
-        self.__network_wallpaper_checker = NetworkWallpaperChecker(http_getter)
+        self.__network_wallpaper_checker = NetworkWallpaperChecker(params.user_id, http_getter)
 
     def check_local_items(self):
         """
