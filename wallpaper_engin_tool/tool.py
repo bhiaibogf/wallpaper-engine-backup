@@ -59,8 +59,9 @@ class Tool:
         dct = {
             'local_items': set(self.__local_wallpaper_checker.local_items),
             'backup_items': set(self.__local_wallpaper_checker.backup_items),
-            'network_items': set(self.__network_wallpaper_checker.subscription),
-            'deleted_items': set(self.__deleted_wallpaper_checker.network_deleted_items),
+            'local_subs': set(self.__local_wallpaper_checker.subscribed_items),
+            'network_subs': set(self.__network_wallpaper_checker.subscription),
+            'network_deleted': set(self.__deleted_wallpaper_checker.network_deleted_items),
         }
         venn(dct)
 
@@ -74,10 +75,18 @@ class Tool:
     def diff(self):
         diff_backup_subscribed = self.__diff(self.__local_wallpaper_checker.backup_items,
                                              self.__local_wallpaper_checker.subscribed_items)
-        print('你备份了 {} 个完全消失的壁纸, 他们是: \n\t{}'.format(len(diff_backup_subscribed), diff_backup_subscribed))
+        print('你备份了 {} 个不在本地订阅中的壁纸, 他们是: \n\t{}'.format(len(diff_backup_subscribed), diff_backup_subscribed))
+
+        diff_backup_subscribed = self.__diff(self.__local_wallpaper_checker.backup_items,
+                                             self.__network_wallpaper_checker.subscription)
+        print('你备份了 {} 个不在账户订阅中的壁纸, 他们是: \n\t{}'.format(len(diff_backup_subscribed), diff_backup_subscribed))
+
         diff_deleted_backup = self.__diff(self.__deleted_wallpaper_checker.network_deleted_items,
                                           self.__local_wallpaper_checker.backup_items)
-        print('你损失了 {} 个消失的壁纸, 他们是: \n\t{}'.format(len(diff_deleted_backup), diff_deleted_backup))
+        print('你损失了 {} 个依旧存在于账户订阅的壁纸, 他们是: \n\t{}'.format(len(diff_deleted_backup), diff_deleted_backup))
+
         diff_local_network = self.__diff(self.__local_wallpaper_checker.local_items,
                                          self.__network_wallpaper_checker.subscription)
-        print('你有 {} 个壁纸订阅异常, 他们是: \n\t{}'.format(len(diff_local_network), diff_local_network))
+        print('你有 {} 个壁纸仅有本地订阅'
+              '（应该只会在该 steam 下载过多个用户的 wallpaper 订阅的情况下出现）, '
+              '他们是: \n\t{}'.format(len(diff_local_network), diff_local_network))
