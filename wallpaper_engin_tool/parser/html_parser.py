@@ -1,19 +1,34 @@
+"""
+使用 BeautifulSoup 模块解析 html 的模块
+"""
 from bs4 import BeautifulSoup
 
 
 class HtmlParser:
+    """
+    用于解析创意工坊网页的类
+    """
+
     def __init__(self, html_text):
-        self.soup = BeautifulSoup(html_text, 'html.parser')
+        self.__soup = BeautifulSoup(html_text, 'html.parser')
 
     def parse_page_number(self):
-        pages = self.soup.find_all('a', {'class': 'pagelink'})
+        """
+        解析用户订阅的最大页码
+        :return: 用户订阅的最大页码
+        """
+        pages = self.__soup.find_all('a', {'class': 'pagelink'})
         return max([int(page.string) for page in pages])
 
     def parse_content(self):
+        """
+        解析订阅页中每一个订阅
+        :return: list[订阅 id]，dic{预览图}，dic{标题}
+        """
         subscription = []
         images = {}
         titles = {}
-        items = self.soup.find_all('div', {'class': 'workshopItemSubscription'})
+        items = self.__soup.find_all('div', {'class': 'workshopItemSubscription'})
         for item in items:
             try:
                 item_id = item['id'][12:]
